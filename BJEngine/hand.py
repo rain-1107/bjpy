@@ -13,6 +13,8 @@ class Hand:
         total = 0
         aces = 0
         for card in self.cards:
+            if not card.face_up:
+                continue
             if card.number == "Ace":
                 aces += 1
             else:
@@ -23,8 +25,16 @@ class Hand:
                 total += 10
         return total
 
+    def clear(self) -> list[Card]:
+        temp = self.cards
+        self.cards = []
+        return temp
+
     def __str__(self):
         text = ""
         for card in self.cards:
-            text += str(card) + "\n"
-        return text
+            text += str(card) + ", "
+        return text[:-2]
+
+    def __iter__(self):
+        return iter(self.cards)
