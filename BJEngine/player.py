@@ -1,4 +1,5 @@
 from BJEngine import Hand, TableDeck, Card
+from typing import Callable
 
 
 class SkeletonPlayer:
@@ -26,7 +27,7 @@ class SkeletonPlayer:
 
 
 class LocalPlayer(SkeletonPlayer):
-    def __init__(self, bet_callback: callable, turn_callback: callable, name: str = "Local"):
+    def __init__(self, bet_callback: Callable, turn_callback: Callable, name: str = "Local"):
         super().__init__(name=name)
         self.place_bet = bet_callback
         self.turn = turn_callback
@@ -50,7 +51,7 @@ class Dealer(SkeletonPlayer):
         self.hand.add(cards[0])
         self.hand.add(cards[1])
 
-    def turn(self, minimum_hand_value: int = 16) -> bool:
-        if self.hand.value < minimum_hand_value:
+    def turn(self) -> bool:
+        if self.hand.value < 17:
             return True
         return False

@@ -1,7 +1,8 @@
 from random import shuffle
+from typing import List, Tuple
 
-SUITS = ("Hearts", "Diamonds", "Clubs", "Spades")
-NUMBERS = ("Ace", "2", "3", "4", "5", "6", "7", "8", "9",
+SUITS = ("Hearts", "Clubs", "Diamond", "Spades")
+NUMBERS = ("2", "3", "4", "5", "6", "7", "8", "9",
            "10", "Jack", "Queen", "King", "Ace")
 NUMBER_TO_VALUE = {"Ace": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7,
                    "8": 8, "9": 9, "10": 10, "Jack": 10, "Queen": 10, "King": 10}
@@ -20,50 +21,40 @@ class Card:
         return "???"
 
 
-class Deck:
+class DiscardPile:
     def __init__(self):
-        self.cards: list[Card] = []
-        for suit in SUITS:
-            for num in NUMBERS:
-                self.cards.append(Card(suit, num))
-        self.shuffle()
+        self.cards: List[Card] = []
 
-    def shuffle(self) -> None:
-        shuffle(self.cards)
+    def add_cards(self, cards: List[Card] | Tuple[Card]) -> None:
+        self.cards.extend(cards)
 
-    def draw(self) -> Card | None:
-        if len(self.cards) == 0:
-            return None
-        return self.cards.pop(len(self.cards) - 1)
 
-    def repopulate(self) -> None:
-        self.cards = []
-        for suit in SUITS:
-            for num in NUMBERS:
-                self.cards.append(Card(suit, num))
-        self.shuffle()
-
-    @property
-    def n_cards(self) -> int:
-        return len(self.cards)
-
+    def pop(self, n_of_cards: int = 0) -> List[Card]:
+        if n_of_cards == 0:
+            temp = self.cards
+            self.cards = []
+            return temp
+        return self.cards[:n_of_cards]
 
 class TableDeck:
     def __init__(self, number_of_decks: int = 4):
-        self.decks: list[Deck] = []
-        for i in range(number_of_decks):
-            self.decks.append(Deck())
-        self.current_deck = 0
+        self.max_cards = number_of_decks * 52
+        self.cards: list[Card] = []
+        for _ in range(number_of_decks):
+            for suit in SUITS:
+                for num in NUMBERS:
+                    self.cards.append(Card(suit, num))
+        shuffle(self.cards)
 
     def draw(self) -> Card | None:
-        if self.current_deck >= len(self.decks):
-            return None
-        card = self.decks[self.current_deck].draw()
-        if self.decks[self.current_deck].n_cards == 0:
-            self.current_deck += 1
-        return card
+        if len(self.cards) > 0:
+            return self.cards.pop(len(self.cards) - 1)
+        return None
 
-    def reshuffle(self) -> None:
-        for deck in self.decks:
-            deck.repopulate()
-        self.current_deck = 0
+    def shuffle(self):
+        shuffle(self.cards)
+
+    def add_cards(self, cards: List[Card]) -> None:
+        if len(self.cards) + len(cards) > self.max_cards:
+            raise OverflowError("Too many cards to add")
+        self.cards.extend(cards)
